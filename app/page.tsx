@@ -56,7 +56,7 @@ const asciiArt = `
                                                       .---:::-::: ........:::--=*#%%#*==%%%%%%#  .-+#+.:::--.      .-::...++==-.-%%%%%%#=+##%%%*+--:::.........:=-:--=:::                                                    
                                                       ::::-:::--- .........:::-=+=========----:---:-::: .::=.      .:::..:..:----:-.--====-:----:::.............-=---::::                                                    
                                                       ::.:-::---- .............:..::-::::::..:.:::...  .:::::      .:.::..  ..-:::...::::::::...:...........:...===---.:.                                                    
-                                                      .:.---===-- .......... ........::::::.:..........::::..       ......... ....::::::::.........   ......... :--=--::                                                     
+                                                      .:.---===-- .......... ........::::::.:..........::::..       ......... ....::::::::.........   .......... :--=--::                                                     
                                                        ::-----::-..........      ....... .         .........        ..... -.  .                .     .......... .::--=:                                                      
                                                        .:--::..   ........                            .. ...         ...                              .........   .::-.                                                      
                                                         :--::.   ..........                           . ....          . .                            ..........   .::-.                                                      
@@ -173,38 +173,54 @@ export default function AsciiArtPage() {
 
       art.style.transform = "scale(1)";
 
-      const containerWidth = container.clientWidth - 32; // padding
+      container.offsetHeight;
+
+      const containerWidth = container.clientWidth - 20; // Less padding
       const artWidth = art.scrollWidth;
+
+      if (artWidth === 0) return;
 
       const newScale = containerWidth / artWidth;
 
-      const finalScale = Math.min(Math.max(newScale, 0.2), 2);
+      const finalScale = Math.min(Math.max(newScale, 0.1), 1.2);
 
       setScale(finalScale);
     };
 
+    const timer = setTimeout(calculateScale, 100);
+
     calculateScale();
     window.addEventListener("resize", calculateScale);
+    window.addEventListener("orientationchange", () => {
+      setTimeout(calculateScale, 200);
+    });
 
-    return () => window.removeEventListener("resize", calculateScale);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("resize", calculateScale);
+      window.removeEventListener("orientationchange", calculateScale);
+    };
   }, []);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4 space-y-8">
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-2 space-y-4">
       <div
         ref={containerRef}
-        className="w-full max-w-full flex justify-center items-center"
+        className="w-full flex justify-center items-center overflow-hidden"
       >
-        <div className="inline-block">
+        <div className="flex justify-center items-center">
           <pre
             ref={artRef}
-            className="font-mono text-black whitespace-pre leading-none text-left"
+            className="font-mono text-black whitespace-pre leading-none"
             style={{
-              fontSize: "0.75rem",
-              lineHeight: "1.1",
+              fontSize: "0.5rem",
+              lineHeight: "0.9", // Even tighter line height
               transform: `scale(${scale})`,
               transformOrigin: "center center",
-              transition: "transform 0.3s ease-in-out",
+              transition: "transform 0.2s ease-out",
+              display: "block",
+              margin: "0 auto",
+              touchAction: "manipulation",
             }}
           >
             {asciiArt}
@@ -214,7 +230,7 @@ export default function AsciiArtPage() {
 
       <div className="text-center">
         <p className="text-sm text-gray-600 italic font-mono">
-          if you&apos;re reading this it&apos;s because you&apos;re gay
+          if you&apos;re reading this... you&apos;re gay.
         </p>
       </div>
     </div>
